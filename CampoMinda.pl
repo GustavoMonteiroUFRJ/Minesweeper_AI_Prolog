@@ -116,3 +116,85 @@ there_is_mine(Row,Col,8,List_in,1):-
 	member(mina(X,Y),List_in),!.
 
 there_is_mine(_,_,_,_,0).
+
+
+
+
+gera_valores(Row,Col,Size,List_minas,[]):-
+	not(mine_neighbor(valor(Row,Col,_),List_minas,Size)),
+	!.
+
+gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)]):-
+	mine_neighbor(valor(Row,Col,K),List_minas,Size),
+	K > 0,
+	!.
+
+gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)|L]):-
+	mine_neighbor(valor(Row,Col,K),List_minas,Size),
+
+	R1 is Row + 1,
+	C1 is Col - 1,
+
+	R2 is Row + 1,
+	C2 is Col,
+
+	R3 is Row + 1,
+	C3 is Col + 1,
+	
+	R4 is Row,
+	C4 is Col + 1,
+	
+	R5 is Row - 1,
+	C5 is Col + 1,
+
+	R6 is Row - 1,
+	C6 is Col,
+
+	R7 is Row - 1,
+	C7 is Col - 1,
+	
+	R8 is Row,
+	C8 is Col - 1,
+
+	gera_valores(R1,C1,Size,List_minas,L1),
+	gera_valores(R2,C2,Size,List_minas,L2),
+	gera_valores(R3,C3,Size,List_minas,L3),
+	gera_valores(R4,C4,Size,List_minas,L4),
+	gera_valores(R5,C5,Size,List_minas,L5),
+	gera_valores(R6,C6,Size,List_minas,L6),
+	gera_valores(R7,C7,Size,List_minas,L7),
+	gera_valores(R8,C8,Size,List_minas,L8),
+
+	append(L1,L2,Aux1),
+	append(Aux1,L3,Aux2),
+	append(Aux2,L4,Aux3),
+	append(Aux3,L5,Aux4),
+	append(Aux4,L6,Aux5),
+	append(Aux5,L7,Aux6),
+	append(Aux6,L8,L),
+	!.
+
+posicao(Row,Col):-
+
+	open('Entrada.txt',read,Input),
+	read(Input,Bord_size),
+	tabuleiro(Size) = Bord_size,
+	read_mines(List_minas,Input),
+	close(Input),
+
+	gera_valores(Row,Col,Size,List_minas,Novo_Ambiente),
+	/*
+	alex_func(Novo_Ambiente,Ambiente),
+	*/
+
+	open('Saida.txt',write,Output),
+
+	print_output(Novo_Ambiente,Output),
+
+
+	close(Output),!.
+
+
+
+
+
