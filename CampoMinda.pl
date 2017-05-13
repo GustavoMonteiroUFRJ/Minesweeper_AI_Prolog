@@ -13,6 +13,7 @@ main:-
 
 	close(Output),!.
 
+/*Le as minas de um arquivo*/
 read_mines([X|L],File):- 
 	read(File,X),
 	not(X = end_of_file),
@@ -20,14 +21,14 @@ read_mines([X|L],File):-
 
 read_mines([],_):-!.
 
-
+/*Imprime uma lista em um arquivo com '.' e quebra de linha*/
 print_output([X|L],File):-
 	write(File,X), write(File,'.'), nl(File),
 	print_output(L,File),!.
 
 print_output([],_):-!.
 
-
+/*Percorre as linhas da matriz*/
 search_board(1,List_minas,Size,List_board):-
 	search_Col(1,Size,Size,List_minas,List_board),
 	!.
@@ -38,6 +39,7 @@ search_board(Row,List_minas,Size,List_board):-
 	append(List_board_Row,List_board_Col,List_board),
 	!.
 	
+/*Percorre as colunas da linha*/
 search_Col(Row,1,Size,List_minas,Element):-
 	get_element_Valor(Row,1,Size,List_minas,Element),
 	!.
@@ -48,10 +50,11 @@ search_Col(Row,Col,Size,List_minas,List_board):-
 	append(List_Temp,Element,List_board),
 	!.
 
+/*Gera cada elemento valor(Row,Col,K) */
 get_element_Valor(Row,Col,_,List_minas,[]):- member(mina(Row,Col),List_minas),!.
 get_element_Valor(Row,Col,Size,List_minas,[valor(Row,Col,K)]):- mine_neighbor(valor(Row,Col,K),List_minas,Size),!.
 
-
+/*Descobre valor K de bonbas ao redor de um campo*/
 mine_neighbor(valor(Row,Col,K),List_in,Size):-
 		Row =< Size, Row >= 1,
 		Col =< Size, Col >= 1,
@@ -75,6 +78,7 @@ mine_neighbor(valor(Row,Col,K),List_in,Size):-
 		K = Aux8
 		.
 
+/*there_is_mine: diz se tem mina em um determinado vizinho*/
 there_is_mine(Row,Col,1,List_in,1):-
 	Y is Col - 1,
 	X is Row + 1,
@@ -119,17 +123,88 @@ there_is_mine(_,_,_,_,0).
 
 
 
-
-gera_valores(Row,Col,Size,List_minas,[]):-
+/*Gera os campos que serão abertos apos uma jogada*/
+gera_valores(Row,Col,Size,List_minas,[]):- %campo fora do limite
 	not(mine_neighbor(valor(Row,Col,_),List_minas,Size)),
 	!.
 
-gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)]):-
+gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)]):- %campo com K>0 minas vizinhas
 	mine_neighbor(valor(Row,Col,K),List_minas,Size),
 	K > 0,
 	!.
 
-gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)|L]):-
+gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)|L]):- %campo com 0 minas vizinhas
+	mine_neighbor(valor(Row,Col,K),List_minas,Size),
+
+	R1 is Row + 1,
+	C1 is Col - 1,
+
+	R2 is Row + 1,
+	C2 is Col,
+
+	R3 is Row + 1,
+	C3 is Col + 1,
+	
+	R4 is Row,
+	C4 is Col + 1,
+	
+	R5 is Row - 1,
+	C5 is Col + 1,
+
+	R6 is Row - 1,
+	C6 is Col,
+
+	R7 is Row - 1,
+	C7 is Col - 1,
+	
+	R8 is Row,
+	C8 is Col - 1,
+
+	Ambiente1 is [valor(Row,Col,K)],
+	gera_valores(R1,C1,Size,List_minas,Ambiente1,L1),
+
+	add_filds_zeros(Ambiente1,L1,Ambiente2), 
+	gera_valores(R2,C2,Size,List_minas,Ambiente2,L2),
+
+	add_filds_zeros(Ambiente2,L2,Ambiente3), 
+	gera_valores(R3,C3,Size,List_minas,Ambiente3,L3),
+
+	add_filds_zeros(Ambiente3,L3,Ambiente4),
+	gera_valores(R4,C4,Size,List_minas,Ambiente4,L4),
+
+	add_filds_zeros(Ambiente4,L4,Ambiente5), 
+	gera_valores(R5,C5,Size,List_minas,Ambiente5,L5),
+
+	add_filds_zeros(Ambiente5,L5,Ambiente6), 
+	gera_valores(R6,C6,Size,List_minas,Ambiente6,L6),
+
+	add_filds_zeros(Ambiente6,L6,Ambiente7), 
+	gera_valores(R7,C7,Size,List_minas,Ambiente7,L7),
+
+	add_filds_zeros(Ambiente7,L7,Ambiente8), 
+	gera_valores(R8,C8,Size,List_minas,Ambiente8,L8),
+
+	append(L1,L2,Aux1),
+	append(Aux1,L3,Aux2),
+	append(Aux2,L4,Aux3),
+	append(Aux3,L5,Aux4),
+	append(Aux4,L6,Aux5),
+	append(Aux5,L7,Aux6),
+	append(Aux6,L8,Aux7),
+	limpar_list(Aux7,L),
+	!.
+
+/*gera_valores/6 faz o mesmo que gera_valores/5. Existe para resolver loop infinito*/
+gera_valores(Row,Col,Size,List_minas,Ambiente,[]):-
+	not(mine_neighbor(valor(Row,Col,_),List_minas,Size)),
+	!.
+
+gera_valores(Row,Col,Size,List_minas,Ambiente,[valor(Row,Col,K)]):-
+	mine_neighbor(valor(Row,Col,K),List_minas,Size),
+	K > 0,
+	!.
+
+gera_valores(Row,Col,Size,List_minas,Ambiente,[valor(Row,Col,K)|L]):-
 	mine_neighbor(valor(Row,Col,K),List_minas,Size),
 
 	R1 is Row + 1,
@@ -174,6 +249,19 @@ gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)|L]):-
 	append(Aux6,L8,L),
 	!.
 
+/*Adiciona na Lout apenas campos com 0 minas ao redor*/
+add_filds_zeros(L,[],L).
+add_filds_zeros(L,[X|Lin],Lout):- X = valor(_,_,0), add_filds_zeros(L,Lin,Lout).
+add_filds_zeros(L,[X|Lin],Lout):- member(X,L), add_filds_zeros(L,Lin,Lout).
+add_filds_zeros(L,[X|Lin],[X|Lout]):- X = valor(_,_,K), K > 0, add_filds_zeros(L,Lin,Lout).
+
+/*Tira elementos repetidos*/
+limpar_list([],[]).
+limpar_list([X|L],Lout):- member(X,L), limpar_list(L,Lout),!.
+limpar_list([X|L],[X|Lout]):- limpar_list(L,Lout),!.
+
+
+/*Cada Jogada*/
 posicao(Row,Col):-
 
 	open('Entrada.txt',read,Input),
