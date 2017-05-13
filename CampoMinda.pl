@@ -195,13 +195,18 @@ gera_valores(Row,Col,Size,List_minas,[valor(Row,Col,K)|L]):- %campo com 0 minas 
 	!.
 
 /*gera_valores/6 faz o mesmo que gera_valores/5. Existe para resolver loop infinito*/
-gera_valores(Row,Col,Size,List_minas,Ambiente,[]):-
+gera_valores(Row,Col,Size,List_minas,_,[]):-
 	not(mine_neighbor(valor(Row,Col,_),List_minas,Size)),
+	!.
+
+gera_valores(Row,Col,Size,List_minas,_,[valor(Row,Col,K)]):-
+	mine_neighbor(valor(Row,Col,K),List_minas,Size),
+	K > 0,
 	!.
 
 gera_valores(Row,Col,Size,List_minas,Ambiente,[valor(Row,Col,K)]):-
 	mine_neighbor(valor(Row,Col,K),List_minas,Size),
-	K > 0,
+	member(valor(Row,Col,K),Ambiente),
 	!.
 
 gera_valores(Row,Col,Size,List_minas,Ambiente,[valor(Row,Col,K)|L]):-
@@ -230,15 +235,30 @@ gera_valores(Row,Col,Size,List_minas,Ambiente,[valor(Row,Col,K)|L]):-
 	
 	R8 is Row,
 	C8 is Col - 1,
+	
+	append(Ambiente,[valor(Row,Col,K)],Ambiente1),
+	gera_valores(R1,C1,Size,List_minas,Ambiente1,L1),
 
-	gera_valores(R1,C1,Size,List_minas,L1),
-	gera_valores(R2,C2,Size,List_minas,L2),
-	gera_valores(R3,C3,Size,List_minas,L3),
-	gera_valores(R4,C4,Size,List_minas,L4),
-	gera_valores(R5,C5,Size,List_minas,L5),
-	gera_valores(R6,C6,Size,List_minas,L6),
-	gera_valores(R7,C7,Size,List_minas,L7),
-	gera_valores(R8,C8,Size,List_minas,L8),
+	add_filds_zeros(Ambiente1,L1,Ambiente2), 
+	gera_valores(R2,C2,Size,List_minas,Ambiente2,L2),
+
+	add_filds_zeros(Ambiente2,L2,Ambiente3), 
+	gera_valores(R3,C3,Size,List_minas,Ambiente3,L3),
+
+	add_filds_zeros(Ambiente3,L3,Ambiente4),
+	gera_valores(R4,C4,Size,List_minas,Ambiente4,L4),
+
+	add_filds_zeros(Ambiente4,L4,Ambiente5), 
+	gera_valores(R5,C5,Size,List_minas,Ambiente5,L5),
+
+	add_filds_zeros(Ambiente5,L5,Ambiente6), 
+	gera_valores(R6,C6,Size,List_minas,Ambiente6,L6),
+
+	add_filds_zeros(Ambiente6,L6,Ambiente7), 
+	gera_valores(R7,C7,Size,List_minas,Ambiente7,L7),
+
+	add_filds_zeros(Ambiente7,L7,Ambiente8), 
+	gera_valores(R8,C8,Size,List_minas,Ambiente8,L8),
 
 	append(L1,L2,Aux1),
 	append(Aux1,L3,Aux2),
@@ -246,13 +266,15 @@ gera_valores(Row,Col,Size,List_minas,Ambiente,[valor(Row,Col,K)|L]):-
 	append(Aux3,L5,Aux4),
 	append(Aux4,L6,Aux5),
 	append(Aux5,L7,Aux6),
-	append(Aux6,L8,L),
+	append(Aux6,L8,Aux7),
+	limpar_list(Aux7,L),
 	!.
 
 /*Adiciona na Lout apenas campos com 0 minas ao redor*/
 add_filds_zeros(L,[],L).
 add_filds_zeros(L,[X|Lin],Lout):- X = valor(_,_,0), add_filds_zeros(L,Lin,Lout).
 add_filds_zeros(L,[X|Lin],Lout):- member(X,L), add_filds_zeros(L,Lin,Lout).
+add_filds_zeros(L,[X|Lin],Lout):- member(X,Lin), add_filds_zeros(L,Lin,Lout).
 add_filds_zeros(L,[X|Lin],[X|Lout]):- X = valor(_,_,K), K > 0, add_filds_zeros(L,Lin,Lout).
 
 /*Tira elementos repetidos*/
