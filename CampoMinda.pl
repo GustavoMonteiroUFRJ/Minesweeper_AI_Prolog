@@ -64,69 +64,84 @@ get_element_Valor(Row,Col,Size,List_minas,[valor(Row,Col,K)]):- mine_neighbor(va
 
 /*Descobre valor K de bonbas ao redor de um campo*/
 mine_neighbor(valor(Row,Col,K),List_minas,Size):-
-		Row =< Size, Row >= 1,
-		Col =< Size, Col >= 1,
 		Aux is 0,
-		there_is_mine(Row,Col,1,List_minas,Mina1), Aux1 is Aux  + Mina1,
-		there_is_mine(Row,Col,2,List_minas,Mina2), Aux2 is Aux1 + Mina2,
-		there_is_mine(Row,Col,3,List_minas,Mina3), Aux3 is Aux2 + Mina3,
-		there_is_mine(Row,Col,4,List_minas,Mina4), Aux4 is Aux3 + Mina4,
-		there_is_mine(Row,Col,5,List_minas,Mina5), Aux5 is Aux4 + Mina5,
-		there_is_mine(Row,Col,6,List_minas,Mina6), Aux6 is Aux5 + Mina6,
-		there_is_mine(Row,Col,7,List_minas,Mina7), Aux7 is Aux6 + Mina7,
-		there_is_mine(Row,Col,8,List_minas,Mina8), Aux8 is Aux7 + Mina8,
+		there_is_mine(Row,Col,posicao1,List_minas,Mina1), Aux1 is Aux  + Mina1,
+		there_is_mine(Row,Col,posicao2,List_minas,Mina2), Aux2 is Aux1 + Mina2,
+		there_is_mine(Row,Col,posicao3,List_minas,Mina3), Aux3 is Aux2 + Mina3,
+		there_is_mine(Row,Col,posicao4,List_minas,Mina4), Aux4 is Aux3 + Mina4,
+		there_is_mine(Row,Col,posicao5,List_minas,Mina5), Aux5 is Aux4 + Mina5,
+		there_is_mine(Row,Col,posicao6,List_minas,Mina6), Aux6 is Aux5 + Mina6,
+		there_is_mine(Row,Col,posicao7,List_minas,Mina7), Aux7 is Aux6 + Mina7,
+		there_is_mine(Row,Col,posicao8,List_minas,Mina8), Aux8 is Aux7 + Mina8,
 		K = Aux8
 		.
 
 /*there_is_mine: diz se tem mina em um determinado vizinho*/
-there_is_mine(Row,Col,1,List_minas,1):-
-	Y is Col - 1,
-	X is Row + 1,
+there_is_mine(Row,Col,posicao1,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao1,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,2,List_minas,1):-
-	Y is Col,
-	X is Row + 1,
+there_is_mine(Row,Col,posicao2,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao2,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,3,List_minas,1):-
-	Y is Col + 1,
-	X is Row + 1,
+there_is_mine(Row,Col,posicao3,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao3,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,4,List_minas,1):-
-	Y is Col + 1,
-	X is Row,
+there_is_mine(Row,Col,posicao4,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao4,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,5,List_minas,1):-
-	Y is Col + 1,
-	X is Row - 1,
+there_is_mine(Row,Col,posicao5,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao5,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,6,List_minas,1):-
-	Y is Col,
-	X is Row - 1,
+there_is_mine(Row,Col,posicao6,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao6,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,7,List_minas,1):-
-	Y is Col - 1,
-	X is Row - 1,
+there_is_mine(Row,Col,posicao7,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao7,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
-there_is_mine(Row,Col,8,List_minas,1):-
-	Y is Col - 1,
-	X is Row,
+there_is_mine(Row,Col,posicao8,List_minas,1):-
+	cordenadas_da_posicao(Row,Col,posicao8,X,Y),
 	member(mina(X,Y),List_minas),
 	!.
 there_is_mine(_,_,_,_,0).
 
 
+cordenadas_da_posicao(Row,Col,posicao1,R,C):-
+	C is Col - 1,
+	R is Row + 1.
+cordenadas_da_posicao(Row,Col,posicao2,R,C):-
+	C is Col,
+	R is Row + 1.
+cordenadas_da_posicao(Row,Col,posicao3,R,C):-
+	C is Col + 1,
+	R is Row + 1.
+cordenadas_da_posicao(Row,Col,posicao4,R,C):-
+	C is Col + 1,
+	R is Row.
+cordenadas_da_posicao(Row,Col,posicao5,R,C):-
+	C is Col + 1,
+	R is Row - 1.
+cordenadas_da_posicao(Row,Col,posicao6,R,C):-
+	C is Col,
+	R is Row - 1.
+cordenadas_da_posicao(Row,Col,posicao7,R,C):-
+	C is Col - 1,
+	R is Row - 1.
+cordenadas_da_posicao(Row,Col,posicao8,R,C):-
+	C is Col - 1,
+	R is Row.
+
 get_element_from_List_board(Row,Col,[X|_],X):- X = valor(Row,Col,_),!.
 get_element_from_List_board(Row,Col,[_|List_board],X):- get_element_from_List_board(Row,Col,List_board,X).
 
 /*Gera os campos que serão abertos apos uma jogada*/
-gera_valores(Row,Col,_,_,List_minas,['jogo encerrado']):- % campo com mina 
+gera_valores(Row,Col,_,_,List_minas,['You loose! Game Over!']):- % campo com mina 
 	member(mina(Row,Col),List_minas), /*Falta implementar a ação de limbar o tabuleiro!*/
 	!.
 gera_valores(Row,Col,Size,_,_,[]):- % campo fora do limite do tabuleiro
@@ -139,29 +154,14 @@ gera_valores(Row,Col,_,List_board,_,[valor(Row,Col,K)]):- % campo com K>0 minas 
 gera_valores(Row,Col,Size,List_board,_,[valor(Row,Col,K)|L]):- % campo com 0 minas vizinhas
 	get_element_from_List_board(Row,Col,List_board,valor(Row,Col,K)),
 
-	R1 is Row + 1,
-	C1 is Col - 1,
-
-	R2 is Row + 1,
-	C2 is Col,
-
-	R3 is Row + 1,
-	C3 is Col + 1,
-	
-	R4 is Row,
-	C4 is Col + 1,
-	
-	R5 is Row - 1,
-	C5 is Col + 1,
-
-	R6 is Row - 1,
-	C6 is Col,
-
-	R7 is Row - 1,
-	C7 is Col - 1,
-	
-	R8 is Row,
-	C8 is Col - 1,
+	cordenadas_da_posicao(Row,Col,posicao1,R1,C1),
+	cordenadas_da_posicao(Row,Col,posicao2,R2,C2),
+	cordenadas_da_posicao(Row,Col,posicao3,R3,C3),
+	cordenadas_da_posicao(Row,Col,posicao4,R4,C4),
+	cordenadas_da_posicao(Row,Col,posicao5,R5,C5),
+	cordenadas_da_posicao(Row,Col,posicao6,R6,C6),
+	cordenadas_da_posicao(Row,Col,posicao7,R7,C7),
+	cordenadas_da_posicao(Row,Col,posicao8,R8,C8),
 
 	Ambiente1 = [valor(Row,Col,K)],
 	gera_valores(R1,C1,Size,List_board,_,Ambiente1,L1), add_fields_zeros(Ambiente1,L1,Ambiente2), 
@@ -199,29 +199,14 @@ gera_valores(Row,Col,_,List_board,_,Ambiente,[valor(Row,Col,K)]):- % campo com 0
 gera_valores(Row,Col,Size,List_board,_,Ambiente,[valor(Row,Col,K)|L]):- % campo com 0 minas vizinhas novo
 	get_element_from_List_board(Row,Col,List_board,valor(Row,Col,K)),
 
-	R1 is Row + 1,
-	C1 is Col - 1,
-
-	R2 is Row + 1,
-	C2 is Col,
-
-	R3 is Row + 1,
-	C3 is Col + 1,
-	
-	R4 is Row,
-	C4 is Col + 1,
-	
-	R5 is Row - 1,
-	C5 is Col + 1,
-
-	R6 is Row - 1,
-	C6 is Col,
-
-	R7 is Row - 1,
-	C7 is Col - 1,
-	
-	R8 is Row,
-	C8 is Col - 1,
+	cordenadas_da_posicao(Row,Col,posicao1,R1,C1),
+	cordenadas_da_posicao(Row,Col,posicao2,R2,C2),
+	cordenadas_da_posicao(Row,Col,posicao3,R3,C3),
+	cordenadas_da_posicao(Row,Col,posicao4,R4,C4),
+	cordenadas_da_posicao(Row,Col,posicao5,R5,C5),
+	cordenadas_da_posicao(Row,Col,posicao6,R6,C6),
+	cordenadas_da_posicao(Row,Col,posicao7,R7,C7),
+	cordenadas_da_posicao(Row,Col,posicao8,R8,C8),
 	
 	append(Ambiente,[valor(Row,Col,K)],Ambiente1),
 	gera_valores(R1,C1,Size,List_board,List_minas,Ambiente1,L1), add_fields_zeros(Ambiente1,L1,Ambiente2), 
@@ -279,33 +264,39 @@ posicao(Row,Col):- % Programa 2
 	!.
 
 imrpimr_ambiente(Novo_Ambiente,List_board):-
-  open('Ambiente.txt',read,Ambiente),
-  read_values(List_Ambiente,Ambiente),
-  close(Ambiente),
+	open('Ambiente.txt',read,Ambiente),
+	read_values(List_Ambiente,Ambiente),
+	close(Ambiente),
 
-  uniao_lista(Novo_Ambiente,List_Ambiente,Ambiente_final),
+	uniao_lista_and_print(Novo_Ambiente,List_Ambiente,Ambiente_final),
 
-  is_game_over(List_board,Ambiente_final),
+	is_game_over(List_board,Ambiente_final),
 
-  open('Ambiente.txt',write,Output),
-  write_values(Ambiente_final,Output),
-  close(Output).
+	open('Ambiente.txt',write,Output),
+	write_values(Ambiente_final,Output),
+	close(Output).
 
-uniao_lista([],L,L).
-uniao_lista([X|L1],L2,L3):-
+uniao_lista_and_print([],L,L).
+uniao_lista_and_print([X|L1],L2,L3):-
 	member(X,L2),
-	uniao_lista(L1,L2,L3),
+	uniao_lista_and_print(L1,L2,L3),
 	!.
-uniao_lista([X|L1],L2,[X|L3]):-
+uniao_lista_and_print([X|L1],L2,[X|L3]):-
     not(member(X,L2)),
-    write_screen(X),
-    uniao_lista(L1,L2,L3),
+    write_screen(X), %% Para imprimir na tela apenas os elementos novos!
+    uniao_lista_and_print(L1,L2,L3),
     !.
 
 contains_list([],_).
 contains_list([X|L1],L2):- member(X,L2), contains_list(L1,L2).
 
-is_game_over(List_board,List_ambiente):- contains_list(List_board,List_ambiente), write('You win! Game Over!'), nl.
+is_game_over(List_board,List_ambiente):- 
+	contains_list(List_board,List_ambiente), 
+	write('You win! Game Over!'), nl
+	open('Ambiente.txt',read,Ambiente_file),
+  	write(Ambiente_file,'You win! Game Over!'),
+  	close(Ambiente_file),
+	.
 is_game_over(_,_).
 
 
@@ -314,11 +305,154 @@ is_game_over(_,_).
 /** Problema 3 - Jogar!  **/
 
 
-jogue:-
+jogo(Size):-
+	open('Ambiente.txt',read,Ambiente_file),
+  	read_values(List_Ambiente,Ambiente_file),
+  	close(Ambiente_file),
+
+
+
+  	not(member('You loose! Game Over!',List_Ambiente)),
+  	not(member('You win! Game Over!',List_Ambiente)),
+  	
+  	criando_disjuncoes(List_Ambiente,Disjuncoes),
+
+  	simplifica(Disjuncoes, Disj),
+  	get_information(Disj,List_Literais),
+  	find_mina(List_Literais),
+  	find_play(List_Literais),	
 	
-	
-	
-	
+	joge(Size)
 	.
 
+criando_disjuncoes(List_Ambiente,Disjuncoes):-
+	criando_disjuncoes(List_Ambiente,List_Ambiente,Disjuncoes)
+	.
 
+criando_disjuncoes(_,[],[]).
+criando_disjuncoes(List_Ambiente,[valor(Row,Col,K)|Board],[Disj|Resto]):-
+	
+	cordenadas_da_posicao(Row,Col,posicao1,R1,C1), 
+	cordenadas_da_posicao(Row,Col,posicao2,R2,C2), 
+	cordenadas_da_posicao(Row,Col,posicao3,R3,C3), 
+	cordenadas_da_posicao(Row,Col,posicao4,R4,C4), 
+	cordenadas_da_posicao(Row,Col,posicao5,R5,C5), 
+	cordenadas_da_posicao(Row,Col,posicao6,R6,C6), 
+	cordenadas_da_posicao(Row,Col,posicao7,R7,C7), 
+	cordenadas_da_posicao(Row,Col,posicao8,R8,C8), 
+
+	gera_literal(R1,C1,Literal1,List_Ambiente), append(Literal1,[],Aux1), 
+	gera_literal(R2,C2,Literal2,List_Ambiente), append(Literal2,Aux1,Aux2),
+	gera_literal(R3,C3,Literal3,List_Ambiente), append(Literal3,Aux2,Aux3),
+	gera_literal(R4,C4,Literal4,List_Ambiente), append(Literal4,Aux3,Aux4),
+	gera_literal(R5,C5,Literal5,List_Ambiente), append(Literal5,Aux4,Aux5),
+	gera_literal(R6,C6,Literal6,List_Ambiente), append(Literal6,Aux5,Aux6),
+	gera_literal(R7,C7,Literal7,List_Ambiente), append(Literal7,Aux6,Aux7),
+	gera_literal(R8,C8,Literal8,List_Ambiente), append(Literal8,Aux7,Aux8),
+	List_Literais = Aux8,
+
+	criando_disjucao(List_Literais,K,Disj),
+
+	criando_disjuncoes(Board,Resto).
+
+gera_literal(Row,Col,[],List_Ambiente):- member(valor(Row,Col,_),List_Ambiente).
+gera_literal(Row,Col,[Literal],_):- Literal = [Row,Col],!.
+
+criando_disjucao([],_,[]).
+
+criando_disjucao([Literal|List_Literais],0,[[barra(Literal)|List_restante]]):-
+	criando_disjucao(List_Literais,0,[List_restante]),
+	!.
+
+criando_disjucao(List_Literais,K,[List_Literais]):-
+	list_len(List_Literais,K),
+	!.
+
+criando_disjucao([Literal|List_Literais],K,Disj_final):-
+	criando_disjucao(List_Literais,K,Temp_1),
+	add_literal(barra(Literal),Temp_1,Disj_1),
+
+	K2 is K - 1,
+	criando_disjucao(List_Literais,K2,Temp_2),
+	add_literal(Literal,Temp_2,Disj_2),
+	append(Disj_1,Disj_2,Disj_final),
+	!.
+
+add_literal(_,[],[]).
+add_literal(Literal,[Clau|Disj_1],[[Literal|Clau]|Disj_2]):-
+	add_literal(Literal,Disj_1,Disj_2),
+	!.
+
+list_len([],0).
+list_len([_|L],N):-list_len(L,M), N is M+1.
+
+find_mina.
+
+find_play.
+
+/* INICIO DO CODIGO QUE RESOLVE AS DIJUSNÇOES */
+
+	get_information([Clausula|Clausulas],List_literais):-
+		get_information(Clausulas,Clausula,List_literais)
+		.
+
+	get_information(_,[],[]).
+	get_information(Disj,[Literal|Literais],[Literal|Resto]):-
+		is_there_all_list(Literal,Disj),
+		get_information(Disj,Literais,Resto),
+		!.
+	get_information(Disj,[_|Literais],Resto):-	
+		get_information(Disj,Literais,Resto),
+		!.
+
+	is_there_all_list(Literal,[Clau]):-
+		member(Literal,Clau),
+		!.
+	is_there_all_list(Literal,[Clau|Clausulas]):-
+		member(Literal,Clau),
+		is_there_all_list(Literal,Clausulas),
+		!.
+
+
+	simplifica([Disj],[Disj]).
+	simplifica([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
+		fusao_disjuncoes(Disjuncao1,Disjuncao2,Disj_temp),
+		simplifica([Disj_temp|List_disj],Resultado)
+		.
+
+	fusao_disjuncoes([], _ , [] ).
+	fusao_disjuncoes([Clau|Clausulas], Disj, Disj_resultante ):- 
+		distributiva(Clau,Disj,[]),
+		fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+		!.
+	fusao_disjuncoes([Clau|Clausulas], Disj, [Clau_resultante|Disj_resultante] ):-
+		distributiva(Clau,Disj,[Clau_resultante]),
+		fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+		!.
+
+	distributiva(Clausula,[],[]).
+	distributiva(Clausula,[Clau|Clausulas],Retorno):- 
+		multiplica_expresao_boleana(Clausula,Clau,[]), 
+		distributiva(Clausula,Clausulas,Retorno),
+		!.
+	distributiva(Clausula,[Clau|Clausulas],[Clau_resultante|Retorno]):- 
+		multiplica_expresao_boleana(Clausula,Clau,[Clau_resultante]), 
+		distributiva(Clausula,Clausulas,Retorno),
+		!.
+
+	multiplica_expresao_boleana([barra(Literal)|_],Clausula,[]):- member(Literal,Clausula).
+	multiplica_expresao_boleana([Literal|_],Clausula,[]):- member(barra(Literal),Clausula).
+	multiplica_expresao_boleana([Literal|Literais],Clausula,[]):- multiplica_expresao_boleana(Literais,Clausula,[]),!.
+
+	multiplica_expresao_boleana(Clausula1,Clausula2,[Clau_resultante]):-  uniao_lista(Clausula1,Clausula2,Clau_resultante). 
+
+	uniao_lista([],L,L).
+	uniao_lista([X|L1],L2,L3):-
+		member(X,L2),
+		uniao_lista(L1,L2,L3),
+		!.
+	uniao_lista([X|L1],L2,[X|L3]):-
+	    not(member(X,L2)),
+	    uniao_lista(L1,L2,L3),
+	    !.
+/* FIM DO CODIGO QUE RESOLVE AS DIJUSNÇOES*/

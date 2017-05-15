@@ -1,5 +1,4 @@
 /* \/ Definições \/ */
-
 % [  [ [ LITERAL ,barra(LITERAL) ],[] ] , [] , []  ] -----> LITERAL = a , b , c ... .
 
 % [  [ CLAUSULA , [] ] , [] , []  ] -----> CLAUSULA = [ LITERAL | LITERAIS ].
@@ -14,12 +13,33 @@
 
 % fusao_disjuncoes([[a,barra(b),c],[barra(a),b,c]] , [ [b,barra(c),barra(d)] , [barra(b),c,barra(d)] , [barra(b),barra(c),d] ], RET).
 
+% fusao_disjuncoes([ [a,barra(b)] , [barra(a),b] ] , [ [a,b,barra(c)] , [a,barra(b),c] , [barra(a),b,c] ] , Disj ), get_information(Disj,List).
+
+get_information([Clausula|Clausulas],List_literais):-
+	get_information(Clausulas,Clausula,List_literais)
+	.
+
+get_information(_,[],[]).
+get_information(Disj,[Literal|Literais],[Literal|Resto]):-
+	is_there_all_list(Literal,Disj),
+	get_information(Disj,Literais,Resto),
+	!.
+get_information(Disj,[_|Literais],Resto):-	
+	get_information(Disj,Literais,Resto),
+	!.
+
+is_there_all_list(Literal,[Clau]):-
+	member(Literal,Clau),
+	!.
+is_there_all_list(Literal,[Clau|Clausulas]):-
+	member(Literal,Clau),
+	is_there_all_list(Literal,Clausulas),
+	!.
+
 
 simple([Disj],[Disj]).
-
 simple([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
 	fusao_disjuncoes(Disjuncao1,Disjuncao2,Disj_temp),
-	write('Disj_temp = '), write(Disj_temp),nl,
 	simple([Disj_temp|List_disj],Resultado)
 	.
 
