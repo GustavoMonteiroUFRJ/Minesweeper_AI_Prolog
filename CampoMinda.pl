@@ -309,3 +309,16 @@ is_game_over(List_board,List_ambiente):- contains_list(List_board,List_ambiente)
 is_game_over(_,_).
 
 
+
+
+/** Problema 3 - Jogar!  **/
+
+
+jogue:-
+	
+	
+	
+	
+	.
+
+

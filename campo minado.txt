@@ -85,14 +85,22 @@ jogo encerrado
 
 Observe que na consulta "?-posicao(4,2)", não há a necessidade de repetir que a posição (3,1) tem o valor 1 pois tal informação foi fornecida no item anterior.
 
+/*
 Programa 3 - prolog
-Faça um programa que jogue o campo minado. Inicialmente, este programa deve escolher uma posição aleatória para começar o jogo. A partir da resposta obtida, o programa deverá escolher uma casa que ele julgue segura para abrir. Ele só poderá usar para tomar esta decisão as informações obtidas por suas consultas e o conhecimento do jogo (regras) que você deverá colocar no programa. O programa deve escolher em cada jogada uma casa em que ele tenha certeza que não há mina. Somente no caso de não haver nenhuma casa livre de bombas, o programa pode jogar aleatoriamente. A saida do programa deve ser um arquivo contendo as jogadas e casas abertas em cada jogada do agente.
+Faça um programa que jogue o campo minado. Inicialmente, este programa deve escolher uma posição 
+aleatória para começar o jogo. A partir da resposta obtida, o programa deverá escolher uma casa que
+ele julgue segura para abrir. Ele só poderá usar para tomar esta decisão as informações obtidas por 
+suas consultas e o conhecimento do jogo (regras) que você deverá colocar no programa. 
+O programa deve escolher em cada jogada uma casa em que ele tenha certeza que não há mina. 
+Somente no caso de não haver nenhuma casa livre de bombas, o programa pode jogar aleatoriamente. 
+A saida do programa deve ser um arquivo contendo as jogadas e casas abertas em cada jogada do agente.
 
 Exemplo: Considere que temos as cláusulas acima, e é feita a seguinte sequência de consultas:
+*/
 
 ?- jogue.
 
-O arquivo de saida deverá ter então:
+% O arquivo de saida deverá ter então:
 
 /*JOGADA 1*/
 posicao(3,1).
