@@ -1,7 +1,7 @@
 /* \/ Definições \/ */
 % [  [ [ LITERAL ,barra(LITERAL) ],[] ] , [] , []  ] -----> LITERAL = a , b , c ... .
 
-% [  [ CLAUSULA , [] ] , [] , []  ] -----> CLAUSULA = [ LITERAL | LITERAIS ].
+% [  [ CLAUSULA , [] ] , [] , []  ] -----> CLAUSULASULA = [ LITERAL | LITERAIS ].
 
 % [  DISJUNCAO , [] , []  ]  -----> DISJUNCAO = [ CLAUSULA | CLAUSULAS ].
 
