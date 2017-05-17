@@ -1,7 +1,7 @@
 start_game:- % Programa 1
 	open('Mina.txt',read,Mina_file),
 	read(Mina_file,Board_size),
-	tabuleiro(Size) = Board_size,
+	tabuleiro(Size) = Board_size, write("Size" = Size),nl,
 	read_mines(List_minas,Mina_file),
 	close(Mina_file),
 
@@ -11,11 +11,12 @@ start_game:- % Programa 1
 	write_values(List_board,Board_file),
 	close(Board_file),
 	open('Ambiente.txt',write,Temp),close(Temp), % zera o ambiente
+	open('Jogadas.txt',write, File),close(File),
 	!.
 
 /*Le uma lista de um arquivo*/
 read_list([X|L],File):- 
-	read(File,X),
+	read(File,X), % write('X'=X),nl,
 	not(X = end_of_file),
 	read_list(L,File),
 	!.
@@ -141,7 +142,7 @@ get_element_from_List_board(Row,Col,[X|_],X):- X = valor(Row,Col,_),!.
 get_element_from_List_board(Row,Col,[_|List_board],X):- get_element_from_List_board(Row,Col,List_board,X).
 
 /*Gera os campos que serão abertos apos uma jogada*/
-gera_valores(Row,Col,_,_,List_minas,['You_loose_Game_Over']):- % campo com mina 
+gera_valores(Row,Col,_,_,List_minas,['game_over(loose)']):- % campo com mina 
 	member(mina(Row,Col),List_minas), /*Falta implementar a ação de limbar o tabuleiro!*/
 	!.
 gera_valores(Row,Col,Size,_,_,[]):- % campo fora do limite do tabuleiro
@@ -268,9 +269,9 @@ imrpimr_ambiente(Novo_Ambiente,List_board):-
 	read_values(List_Ambiente,Ambiente),
 	close(Ambiente),
 
-	uniao_lista_and_print(Novo_Ambiente,List_Ambiente,Ambiente_final),
+	uniao_lista_and_print(Novo_Ambiente,List_Ambiente,Ambiente_temp),
 
-	is_game_over(List_board,Ambiente_final),
+	is_game_over(List_board,Ambiente_temp,Ambiente_final),
 
 	open('Ambiente.txt',write,Output),
 	write_values(Ambiente_final,Output),
@@ -290,45 +291,33 @@ uniao_lista_and_print([X|L1],L2,[X|L3]):-
 contains_list([],_).
 contains_list([X|L1],L2):- member(X,L2), contains_list(L1,L2).
 
-is_game_over(List_board,List_ambiente):- 
+is_game_over(List_board,List_ambiente,[game_over(win)|List_ambiente]):- 
 	contains_list(List_board,List_ambiente), 
 	write('You_win_Game_Over'), nl,
-	open('Ambiente.txt',read,Ambiente_file),
-  	write(Ambiente_file,'You_win_Game_Over'),
-  	close(Ambiente_file),
 	!.
-is_game_over(_,_).
-
-
-
+is_game_over(_,L,L).
 
 /** Problema 3 - Jogar!  **/
-joga(Size):- joga_aleatorio(Size), joga_(Size).  
+joga(Size):- joga_aleatorio(Size), not(joga_(Size)).  
 
-joga_(Size):- 
+joga_(Size):-
 
 	open('Ambiente.txt',read,Ambiente_file),
-  	read_values(List_Ambiente,Ambiente_file),
+  	read_values(List_Ambiente,Ambiente_file), %write("ambiente"=List_Ambiente),nl,
   	close(Ambiente_file),
 
-  	not(member('You_win_Game_Over',List_Ambiente)),
-  	not(member('You_loose_Game_Over',List_Ambiente)),
+  	not(member('game_over(win)',List_Ambiente)), 
+  	not(member('game_over(loose)',List_Ambiente)),
   	
   	criando_disjuncoes(List_Ambiente,Disjuncoes_temp,Size),
   	remove_lista_vazia(Disjuncoes_temp,Disjuncoes),
 
-  	write('Disj main = '),printgus([Disjuncoes]),nl, %% DEBUG
-
   	simplifica(Disjuncoes, [Disj]), 
- 
-  	nl, write('Disj simplifica ='),printgus(Disj),nl, %% DEBUG
- 
+
   	get_information(Disj,List_literais),
-  	write('get_Information = '),printgus([List_literais]),nl,
   	find_mina(List_literais),
-  	% write('List_literais = '),printgus(List_literais),nl,
   	find_play(List_literais,List_posicoes),
-  	write('List_posicoes = '),printgus([List_posicoes]),nl,
+  	nl,write('List_posicoes = '),printgus([List_posicoes]),nl,nl,
   	play_all(List_posicoes,Size),
 
 	joga_(Size),
@@ -361,11 +350,7 @@ criando_disjuncoes(List_Ambiente,[valor(Row,Col,K)|Board],[Disj|Resto],Size):-
 	gera_literal(R8,C8,Literal8,List_Ambiente,Size), append(Literal8,Aux7,Aux8), 
 	List_literais = Aux8,
 
-	% write('List_literais ='),nl,printgus(List_literais),nl, %% DEBUG
-
 	criando_disjucao(List_literais,K,Disj,Size),
-	
-	% write('Disj ='),nl,printgus(Disj),nl, %% DEBUG
 
 	criando_disjuncoes(List_Ambiente,Board,Resto,Size),
 	!.
@@ -383,10 +368,12 @@ criando_disjucao(List_literais,K,[List_literais],_):-
 	list_len(List_literais,K),
 	!.
 criando_disjucao([Literal|List_literais],K,Disj_final,Size):-
+	
 	criando_disjucao(List_literais,K,Temp_1,Size),
 	add_literal(barra(Literal),Temp_1,Disj_1),
 
 	K2 is K - 1,
+	
 	criando_disjucao(List_literais,K2,Temp_2,Size),
 	add_literal(Literal,Temp_2,Disj_2),
 	append(Disj_1,Disj_2,Disj_final),
@@ -402,7 +389,13 @@ list_len([_|L],N):-list_len(L,M), N is M+1.
 
 find_mina([]).
 find_mina([barra(_)|List_literais]):- find_mina(List_literais),!.
-find_mina([[Row,Col]|List_literais]):- Mina = mina(Row,Col), write(Mina),write('.'),nl,find_mina(List_literais),!.
+find_mina([[Row,Col]|List_literais]):- 
+	Mina = mina(Row,Col), 
+	write(Mina),write('.'),nl,
+	open('Jogadas.txt', append, File),
+	write(File,Mina),write(File,'.'),nl(File), close(File),
+	find_mina(List_literais),
+	!.
 
 find_play([],[]).
 find_play([barra(Literal)|List_literais],[Literal|Resto]):- find_play(List_literais,Resto),!.
@@ -415,8 +408,11 @@ play_all([[Row,Col]|List],_):- joga_na_posicao(Row,Col), play_all(List,_),!.
 %joga_aleatorio(_):- joga_na_posicao(3,3).
 joga_aleatorio(S):- Size is S + 1, random(1,Size,Row), random(1,Size,Col), joga_na_posicao(Row,Col).
 
-joga_na_posicao(Row,Col):- write(posicao(Row,Col)),write('.'),nl,nl, posicao(Row,Col). 
-
+joga_na_posicao(Row,Col):- 
+	open('Jogadas.txt', append, File),
+	write(posicao(Row,Col)),write('.'),nl,nl,
+	write(File,posicao(Row,Col)),write(File,'.'),nl(File),
+	posicao(Row,Col), close(File).
 
 remove_lista_vazia([],[]).
 remove_lista_vazia([ [[]] |L],Lout):- remove_lista_vazia(L,Lout).
@@ -446,24 +442,21 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 		is_there_all_list(Literal,Clausulas),
 		!.
 
-	simplifica([Disj],[Disj]):- write('entrou no caso basse do simplifica'),nl.
+	simplifica([Disj],[Disj]).
 	simplifica([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
-		% nl,write('Disj1 = '),write(Disjuncao1),nl,nl,
-		% write('Disj2 = '),write(Disjuncao2),nl,
-		% write('Simplicica :'),nl,
 		fusao_disjuncoes(Disjuncao1,Disjuncao2,Disj_temp),
-		%nl,write('Passou!!!'),
 		simplifica([Disj_temp|List_disj],Resultado),
 		!.
 
 	fusao_disjuncoes([],_,[]).
-	fusao_disjuncoes([Clau|Clausulas], Disj, Disj_resultante ):- 
+	fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):- 
 		distributiva(Clau,Disj,[]),
-		fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+		fusao_disjuncoes(Clausulas,Disj,Elemento),
 		!.
-	fusao_disjuncoes([Clau|Clausulas], Disj, [Clau_resultante|Disj_resultante] ):-
-		distributiva(Clau,Disj,[Clau_resultante]),
+	fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):-
+		distributiva(Clau,Disj,Disj_temp),
 		fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+		append(Disj_temp, Disj_resultante, Elemento),
 		!.
 
 	distributiva(_,[],[]).
@@ -472,16 +465,21 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 		distributiva(Clausula,Clausulas,Retorno),
 		!.
 	distributiva(Clausula,[Clau|Clausulas],[Clau_resultante|Retorno]):- 
-		multiplica_expresao_boleana(Clausula,Clau,[Clau_resultante]), 
+		multiplica_expresao_boleana(Clausula,Clau,Clau_resultante), 
 		distributiva(Clausula,Clausulas,Retorno),
 		!.
 
-	multiplica_expresao_boleana([barra(Literal)|_],Clausula,[]):- member(Literal,Clausula),!.
-	multiplica_expresao_boleana([Literal|_],Clausula,[]):- member(barra(Literal),Clausula),!.
-	multiplica_expresao_boleana([_|Literais],Clausula,[]):- multiplica_expresao_boleana(Literais,Clausula,[]),!.
+	% multiplica_expresao_boleana().
+	multiplica_expresao_boleana_([barra(Literal)|_],Clausula):- member(Literal,Clausula),!.
+	multiplica_expresao_boleana_([Literal|_],Clausula):- member(barra(Literal),Clausula),!.
+	multiplica_expresao_boleana_([_|Literais],Clausula):- multiplica_expresao_boleana_(Literais,Clausula),!.
 
-	multiplica_expresao_boleana(Clausula1,Clausula2,[Clau_resultante]):-
+	multiplica_expresao_boleana(Clausula1,Clausula2,[]):-
+		multiplica_expresao_boleana_(Clausula1,Clausula2),!
+		.
+	multiplica_expresao_boleana(Clausula1,Clausula2,Clau_resultante):-
 		uniao_lista(Clausula1,Clausula2,Clau_resultante),!. 
+
 
 	uniao_lista([],L,L).
 	uniao_lista([X|L1],L2,L3):-

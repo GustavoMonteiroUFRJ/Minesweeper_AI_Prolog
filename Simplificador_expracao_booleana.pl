@@ -37,30 +37,31 @@ is_there_all_list(Literal,[Clau|Clausulas]):-
 	!.
 
 
-simple([Disj],[Disj]).
+simple([Disj],[Disj]). % ao simplificar disjuncao o resultado é sempre uma disjuncao.
 simple([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
 	fusao_disjuncoes(Disjuncao1,Disjuncao2,Disj_temp),
-	simple([Disj_temp|List_disj],Resultado)
-	.
-
-fusao_disjuncoes([], _ , [] ).
-fusao_disjuncoes([Clau|Clausulas], Disj, Disj_resultante ):- 
-	distributiva(Clau,Disj,[]),
-	fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+	simple([Disj_temp|List_disj],Resultado),
 	!.
-fusao_disjuncoes([Clau|Clausulas], Disj, [Clau_resultante|Disj_resultante] ):-
-	distributiva(Clau,Disj,[Clau_resultante]),
-	fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+
+fusao_disjuncoes([],_,[]).
+fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):- 
+	distributiva(Clau,Disj,[]),
+	fusao_disjuncoes(Clausulas,Disj,Elemento),
+	!.
+fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):-
+	distributiva(Clau,Disj,Disj_resultante),
+	fusao_disjuncoes(Clausulas,Disj,Elemento_temp),
+	append(Disj_resultante,Elemento_temp,Elemento),
 	!.
 
 distributiva(Clausula,[],[]).
-distributiva(Clausula,[Clau|Clausulas],Retorno):- 
+distributiva(Clausula,[Clau|Clausulas],Disj):- 
 	multiplica_expresao_boleana(Clausula,Clau,[]), 
-	distributiva(Clausula,Clausulas,Retorno),
+	distributiva(Clausula,Clausulas,Disj),
 	!.
-distributiva(Clausula,[Clau|Clausulas],[Clau_resultante|Retorno]):- 
+distributiva(Clausula,[Clau|Clausulas],[Clau_resultante|Disj]):- 
 	multiplica_expresao_boleana(Clausula,Clau,[Clau_resultante]), 
-	distributiva(Clausula,Clausulas,Retorno),
+	distributiva(Clausula,Clausulas,Disj),
 	!.
 
 multiplica_expresao_boleana([barra(Literal)|_],Clausula,[]):- member(Literal,Clausula).
