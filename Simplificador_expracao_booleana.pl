@@ -15,9 +15,11 @@
 
 % fusao_disjuncoes([ [a,barra(b)] , [barra(a),b] ] , [ [a,b,barra(c)] , [a,barra(b),c] , [barra(a),b,c] ] , Disj ), get_information(Disj,List).
 
+
+get_information([Clau],Clau):-!.
 get_information([Clausula|Clausulas],List_literais):-
-	get_information(Clausulas,Clausula,List_literais)
-	.
+	get_information(Clausulas,Clausula,List_literais),
+	!.
 
 get_information(_,[],[]).
 get_information(Disj,[Literal|Literais],[Literal|Resto]):-
@@ -36,11 +38,10 @@ is_there_all_list(Literal,[Clau|Clausulas]):-
 	is_there_all_list(Literal,Clausulas),
 	!.
 
-
-simple([Disj],[Disj]). % ao simplificar disjuncao o resultado é sempre uma disjuncao.
-simple([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
+simplifica([Disj],[Disj]).
+simplifica([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
 	fusao_disjuncoes(Disjuncao1,Disjuncao2,Disj_temp),
-	simple([Disj_temp|List_disj],Resultado),
+	simplifica([Disj_temp|List_disj],Resultado),
 	!.
 
 fusao_disjuncoes([],_,[]).
@@ -49,26 +50,32 @@ fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):-
 	fusao_disjuncoes(Clausulas,Disj,Elemento),
 	!.
 fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):-
-	distributiva(Clau,Disj,Disj_resultante),
-	fusao_disjuncoes(Clausulas,Disj,Elemento_temp),
-	append(Disj_resultante,Elemento_temp,Elemento),
+	distributiva(Clau,Disj,Disj_temp),
+	fusao_disjuncoes(Clausulas,Disj,Disj_resultante),
+	append(Disj_temp, Disj_resultante, Elemento),
 	!.
 
-distributiva(Clausula,[],[]).
-distributiva(Clausula,[Clau|Clausulas],Disj):- 
+distributiva(_,[],[]).
+distributiva(Clausula,[Clau|Clausulas],Retorno):- 
 	multiplica_expresao_boleana(Clausula,Clau,[]), 
-	distributiva(Clausula,Clausulas,Disj),
+	distributiva(Clausula,Clausulas,Retorno),
 	!.
-distributiva(Clausula,[Clau|Clausulas],[Clau_resultante|Disj]):- 
-	multiplica_expresao_boleana(Clausula,Clau,[Clau_resultante]), 
-	distributiva(Clausula,Clausulas,Disj),
+distributiva(Clausula,[Clau|Clausulas],[Clau_resultante|Retorno]):- 
+	multiplica_expresao_boleana(Clausula,Clau,Clau_resultante), 
+	distributiva(Clausula,Clausulas,Retorno),
 	!.
 
-multiplica_expresao_boleana([barra(Literal)|_],Clausula,[]):- member(Literal,Clausula).
-multiplica_expresao_boleana([Literal|_],Clausula,[]):- member(barra(Literal),Clausula).
-multiplica_expresao_boleana([Literal|Literais],Clausula,[]):- multiplica_expresao_boleana(Literais,Clausula,[]),!.
+% multiplica_expresao_boleana().
+multiplica_expresao_boleana_([barra(Literal)|_],Clausula):- member(Literal,Clausula),!.
+multiplica_expresao_boleana_([Literal|_],Clausula):- member(barra(Literal),Clausula),!.
+multiplica_expresao_boleana_([_|Literais],Clausula):- multiplica_expresao_boleana_(Literais,Clausula),!.
 
-multiplica_expresao_boleana(Clausula1,Clausula2,[Clau_resultante]):-  uniao_lista(Clausula1,Clausula2,Clau_resultante). 
+multiplica_expresao_boleana(Clausula1,Clausula2,[]):-
+	multiplica_expresao_boleana_(Clausula1,Clausula2),!
+	.
+multiplica_expresao_boleana(Clausula1,Clausula2,Clau_resultante):-
+	uniao_lista(Clausula1,Clausula2,Clau_resultante),!. 
+
 
 uniao_lista([],L,L).
 uniao_lista([X|L1],L2,L3):-

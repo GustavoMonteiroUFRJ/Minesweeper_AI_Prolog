@@ -1,7 +1,10 @@
-start_game:- % Programa 1
+
+start_game:- start_game(Size), write("Size" = Size), nl.
+
+start_game(Size):- % Programa 1
 	open('Mina.txt',read,Mina_file),
 	read(Mina_file,Board_size),
-	tabuleiro(Size) = Board_size, write("Size" = Size),nl,
+	tabuleiro(Size) = Board_size,
 	read_mines(List_minas,Mina_file),
 	close(Mina_file),
 
@@ -10,13 +13,13 @@ start_game:- % Programa 1
 	open('Board.txt',write,Board_file),
 	write_values(List_board,Board_file),
 	close(Board_file),
-	open('Ambiente.txt',write,Temp),close(Temp), % zera o ambiente
-	open('Jogadas.txt',write, File),close(File),
+	open('Ambiente.txt',write,Temp),close(Temp), % zera o Ambiente
+	open('Jogadas.txt',write, File),close(File), % zera o Jogadas
 	!.
 
 /*Le uma lista de um arquivo*/
 read_list([X|L],File):- 
-	read(File,X), % write('X'=X),nl,
+	read(File,X),
 	not(X = end_of_file),
 	read_list(L,File),
 	!.
@@ -265,9 +268,7 @@ posicao(Row,Col):- % Programa 2
 	!.
 
 imrpimr_ambiente(Novo_Ambiente,List_board):-
-	open('Ambiente.txt',read,Ambiente),
-	read_values(List_Ambiente,Ambiente),
-	close(Ambiente),
+	file_to_list('Ambiente.txt',List_Ambiente),
 
 	uniao_lista_and_print(Novo_Ambiente,List_Ambiente,Ambiente_temp),
 
@@ -297,30 +298,36 @@ is_game_over(List_board,List_ambiente,[game_over(win)|List_ambiente]):-
 	!.
 is_game_over(_,L,L).
 
+file_to_list(Nome,List):-
+	open(Nome,read,File),
+  	read_list(List,File),
+  	close(File)
+	.
+
 /** Problema 3 - Jogar!  **/
-joga(Size):- joga_aleatorio(Size), not(joga_(Size)).  
 
-joga_(Size):-
+joga:- start_game(Size), joga(Size).
 
-	open('Ambiente.txt',read,Ambiente_file),
-  	read_values(List_Ambiente,Ambiente_file), %write("ambiente"=List_Ambiente),nl,
-  	close(Ambiente_file),
+joga(Size):- joga_aleatorio(Size,[],List_Ambiente), not(joga_(Size,List_Ambiente)).  
 
-  	not(member('game_over(win)',List_Ambiente)), 
-  	not(member('game_over(loose)',List_Ambiente)),
+joga_(Size,List_Ambiente):-
+
+  	not(member(game_over(win),List_Ambiente)), % por conta dessas duas linhas jogo_/2 retorna sempre false
+  	not(member(game_over(loose),List_Ambiente)),
   	
   	criando_disjuncoes(List_Ambiente,Disjuncoes_temp,Size),
   	remove_lista_vazia(Disjuncoes_temp,Disjuncoes),
-
+  	
   	simplifica(Disjuncoes, [Disj]), 
 
   	get_information(Disj,List_literais),
+  	% nl,write('List_literais = '),printgus([List_literais]),nl, % DEBUG
   	find_mina(List_literais),
   	find_play(List_literais,List_posicoes),
-  	nl,write('List_posicoes = '),printgus([List_posicoes]),nl,nl,
-  	play_all(List_posicoes,Size),
+  	% write('List_posicoes = '),printgus([List_posicoes]),nl, % DEBUG
+  	play_all(List_posicoes,Size,List_Ambiente,Nova_List_Ambiente),
 
-	joga_(Size),
+	joga_(Size,Nova_List_Ambiente),
 	!.
 
 criando_disjuncoes(List_Ambiente,Disjuncoes,Size):-
@@ -390,29 +397,53 @@ list_len([_|L],N):-list_len(L,M), N is M+1.
 find_mina([]).
 find_mina([barra(_)|List_literais]):- find_mina(List_literais),!.
 find_mina([[Row,Col]|List_literais]):- 
-	Mina = mina(Row,Col), 
-	write(Mina),write('.'),nl,
+	file_to_list('Jogadas.txt',List_minas),
+	not(member(mina(Row,Col),List_minas)),
+
+	Mina = mina(Row,Col), write(Mina),write('.'),nl,
 	open('Jogadas.txt', append, File),
 	write(File,Mina),write(File,'.'),nl(File), close(File),
+	
 	find_mina(List_literais),
 	!.
+find_mina([[_,_]|List_literais]):- find_mina(List_literais),!. 
+
 
 find_play([],[]).
 find_play([barra(Literal)|List_literais],[Literal|Resto]):- find_play(List_literais,Resto),!.
 find_play([_|List_literais],Resto):- find_play(List_literais,Resto),!.
 
-play_all([],Size):- joga_aleatorio(Size),!.
-play_all([[Row,Col]],_):- joga_na_posicao(Row,Col),!.
-play_all([[Row,Col]|List],_):- joga_na_posicao(Row,Col), play_all(List,_),!.
+/*  LA = List_Ambiente  */
+play_all([],Size,LA,Nova_LA):- 
+	joga_aleatorio(Size,LA,Nova_LA),!.
+play_all([[Row,Col]],_,LA,Nova_LA):- 
+	joga_na_posicao(Row,Col,LA,Nova_LA),!.
+play_all([[Row,Col]|List],_,LA,Nova_LA):- 
+	joga_na_posicao(Row,Col,LA,Nova_LA_temp), 
+	play_all(List,_,Nova_LA_temp,Nova_LA),!.
 
-%joga_aleatorio(_):- joga_na_posicao(3,3).
-joga_aleatorio(S):- Size is S + 1, random(1,Size,Row), random(1,Size,Col), joga_na_posicao(Row,Col).
+% joga_aleatorio(_):- joga_na_posicao(3,3).
+joga_aleatorio(S,LA,Nova_LA):- Size is S + 1, random(1,Size,Row), random(1,Size,Col), joga_na_posicao(Row,Col,LA,Nova_LA).
 
-joga_na_posicao(Row,Col):- 
+joga_na_posicao(_,_,List_Ambiente,List_Ambiente):- member(game_over(_),List_Ambiente),!.
+
+joga_na_posicao(Row,Col,List_Ambiente,Nova_List_Ambiente):-
+	file_to_list('Jogadas.txt',List_jogadas_e_minas),
+	
+	not(member(valor(Row,Col,_),List_Ambiente)),  % checa se está aberta.
+	not(member(posicao(Row,Col),List_jogadas_e_minas)), % checa se já foi jogada antes.
+	not(member(mina(Row,Col),List_jogadas_e_minas)),  % checa se já se sabe que é uma mina.
+
 	open('Jogadas.txt', append, File),
-	write(posicao(Row,Col)),write('.'),nl,nl,
-	write(File,posicao(Row,Col)),write(File,'.'),nl(File),
-	posicao(Row,Col), close(File).
+	nl,write(posicao(Row,Col)),write('.'),nl, % imprime na tela.
+	write(File,posicao(Row,Col)),write(File,'.'),nl(File), % imprime no arquivo.
+	close(File),
+
+	posicao(Row,Col),
+	file_to_list('Ambiente.txt', Nova_List_Ambiente),
+	!.
+joga_na_posicao(_,_,List_Ambiente,List_Ambiente).
+
 
 remove_lista_vazia([],[]).
 remove_lista_vazia([ [[]] |L],Lout):- remove_lista_vazia(L,Lout).
@@ -493,7 +524,6 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 /* FIM DO CODIGO QUE RESOLVE AS DIJUSNÇOES*/
 
 
-
-
+% auxilio para debugar!!!
 printgus([]).
 printgus([X|L]):- write(X),nl,printgus(L).
