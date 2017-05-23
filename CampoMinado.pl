@@ -1,3 +1,29 @@
+/*
+O programa le um arquivo com nome Mina.txt com a primeira linha contendo " tabuleiro(N)."
+Com N numerico, e depois uma sequencia de elmentos " mina(R,C) " com 0 < R,C <= N.
+
+Apos executar start_gama/0 ou start_gama/1 é gerado um arquivo Board.txt com todos os elementos
+" valor(R,C,K). " sendo K o nuemro de minas ao redor da casa [R,C].
+
+O codigo implementa uma solução para jogar Campo Minado na seguinta idiea:
+É jogado primeiramente uma posição aleatória sem nenhuma prioridade.
+Apos, é analizado todas as casas abertas e criado uma conjuntção (chamado de clausulas)
+para cada realidade possivel de existencia ou não de minas nos campos ao redor de cada casa. 
+Então, é criado uma disjunção com todas essas clausulas. E então é juntado todas as disjunções
+em uma grande conjunção. Simplificamos essa grande cojunção em apenas uma disjunção e então analizamos
+o resultado. Consideramos um literal [R,C] como mina e barra([R,C]) como não mina.
+Caso algum literal apareça em todas as clausulas da disjunção simplificada, consideramos que seu valor
+já é definido, e apontamos a casa como mina ou como um campo a ser jogado.
+
+Cada jogada abre o valor de pelo menos uma casa e isso é gravado em um arquivo chamado Ambiente.txt. 
+Caso seja mina o programa perde e o jogo termina, caso contrario, o jogo só termina quando o arquivo 
+Ambiente.txt tiver todos os elementos que o arquivo Bord.txt e assim o programa ganha.
+
+Cada jogada é registrado em um arquivo chamado Jogadas.txt como " posicao(R,C). " e caso consiga
+provar que há uma mina, é registrado " mina(R,C) ".
+
+*/
+
 
 start_game:- start_game(Size), write("Size" = Size), nl.
 
