@@ -8,17 +8,18 @@ start_game(Size):- % Programa 1
 	read_mines(List_minas,Mina_file),
 	close(Mina_file),
 
-	search_board(Size,List_minas,Size,List_board),
+	search_board(Size,List_minas,Size,List_board), % Busca em profundidade pelo tabuleiro.
 
-	open('Board.txt',write,Board_file),
+	open('Board.txt',write,Board_file), % OutPut do problema 1.
 	write_values(List_board,Board_file),
 	close(Board_file),
-	open('Ambiente.txt',write,Temp),close(Temp), % zera o Ambiente
-	open('Jogadas.txt',write, File),close(File), % zera o Jogadas
+
+	open('Ambiente.txt',write,Temp),close(Temp), % zera o Ambiente.
+	open('Jogadas.txt',write, File),close(File), % zera o Jogadas.
 	!.
 
 /*Le uma lista de um arquivo*/
-read_list([X|L],File):- 
+read_list([X|L],File):- % recebe um stream  
 	read(File,X),
 	not(X = end_of_file),
 	read_list(L,File),
@@ -26,6 +27,11 @@ read_list([X|L],File):-
 read_list([],_):-!.
 read_mines(List_minas,File):- read_list(List_minas,File).
 read_values(List_values,File):- read_list(List_values,File).
+file_to_list(Nome,List):- % recebe o nome de um arquivo
+	open(Nome,read,File),
+  	read_list(List,File),
+  	close(File)
+	.
 
 
 /*Imprime uma lista em um arquivo com '.' e quebra de linha*/
@@ -42,29 +48,29 @@ write_list_screen([X|L]):- write_screen(X), write_list_screen(L).
 
 /*Percorre as linhas da matriz*/
 search_board(1,List_minas,Size,List_board):-
-	search_Col(1,Size,Size,List_minas,List_board),
+	search_Col(1,Size,List_minas,List_board),
 	!.
 search_board(Row,List_minas,Size,List_board):-
 	R is Row - 1,
 	search_board(R,List_minas,Size,List_board_Row),
-	search_Col(Row,Size,Size,List_minas,List_board_Col),
+	search_Col(Row,Size,List_minas,List_board_Col),
 	append(List_board_Row,List_board_Col,List_board),
 	!.
 	
 /*Percorre as colunas da linha*/
-search_Col(Row,1,Size,List_minas,Element):-
-	get_element_Valor(Row,1,Size,List_minas,Element),
+search_Col(Row,1,List_minas,Element):-
+	get_element_Valor(Row,1,List_minas,Element),
 	!.
-search_Col(Row,Col,Size,List_minas,List_board):-
+search_Col(Row,Col,List_minas,List_board):-
 	C is Col - 1,
-	search_Col(Row,C,Size,List_minas,List_Temp),
-	get_element_Valor(Row,Col,Size,List_minas,Element),
+	search_Col(Row,C,List_minas,List_Temp),
+	get_element_Valor(Row,Col,List_minas,Element),
 	append(List_Temp,Element,List_board),
 	!.
 
 /*Gera cada elemento valor(Row,Col,K) */
-get_element_Valor(Row,Col,_,List_minas,[]):- member(mina(Row,Col),List_minas),!.
-get_element_Valor(Row,Col,_,List_minas,[valor(Row,Col,K)]):- mine_neighbor(valor(Row,Col,K),List_minas),!.
+get_element_Valor(Row,Col,List_minas,[]):- member(mina(Row,Col),List_minas),!.
+get_element_Valor(Row,Col,List_minas,[valor(Row,Col,K)]):- mine_neighbor(valor(Row,Col,K),List_minas),!.
 
 /*Descobre valor K de bonbas ao redor de um campo*/
 mine_neighbor(valor(Row,Col,K),List_minas):-
@@ -80,7 +86,7 @@ mine_neighbor(valor(Row,Col,K),List_minas):-
 		K = Aux8
 		.
 
-/*there_is_mine: diz se tem mina em um determinado vizinho*/
+/*Diz se tem mina em um determinado vizinho*/
 there_is_mine(Row,Col,posicao1,List_minas,1):-
 	cordenadas_da_posicao(Row,Col,posicao1,X,Y),
 	member(mina(X,Y),List_minas),
@@ -115,7 +121,6 @@ there_is_mine(Row,Col,posicao8,List_minas,1):-
 	!.
 there_is_mine(_,_,_,_,0).
 
-
 cordenadas_da_posicao(Row,Col,posicao1,R,C):-
 	C is Col - 1,
 	R is Row + 1.
@@ -141,6 +146,7 @@ cordenadas_da_posicao(Row,Col,posicao8,R,C):-
 	C is Col - 1,
 	R is Row.
 
+/*Retorna o elemento valor(Row,Col,K), se existir, para (Row,Col) definidas*/
 get_element_from_List_board(Row,Col,[X|_],X):- X = valor(Row,Col,_),!.
 get_element_from_List_board(Row,Col,[_|List_board],X):- get_element_from_List_board(Row,Col,List_board,X).
 
@@ -152,7 +158,7 @@ gera_valores(Row,Col,Size,_,_,[]):- % campo fora do limite do tabuleiro
 	( Row > Size ; Row < 1 ; Col > Size ; Col < 1) ,
 	write('Campo fora do tabuleiro'),
 	!.
-gera_valores(Row,Col,_,List_board,_,[valor(Row,Col,K)]):- % campo com K>0 minas vizinhas
+gera_valores(Row,Col,_,List_board,_,[valor(Row,Col,K)]):- % campo com K>0 minas vizinhas.
 	get_element_from_List_board(Row,Col,List_board,valor(Row,Col,K)), K > 0,
 	!.
 gera_valores(Row,Col,Size,List_board,_,[valor(Row,Col,K)|L]):- % campo com 0 minas vizinhas
@@ -185,11 +191,13 @@ gera_valores(Row,Col,Size,List_board,_,[valor(Row,Col,K)|L]):- % campo com 0 min
 	append(Aux5,L7,Aux6),
 	append(Aux6,L8,Aux7),
 
-	retira_elemento(valor(Row,Col,K),Aux7,Aux8),
+	% Nem sempre Aux7 tem o elemento valor(Row,Col,K). Isso ele precisa ser adicionado
+	% porem, para não ter esse elemento repetido, é preciso sempre checar e retirar.
+	retira_elemento(valor(Row,Col,K),Aux7,Aux8), 
 	limpar_list(Aux8,L),
 	!.
 
-/*gera_valores/7 faz o mesmo que gera_valores/6. Existe para resolver loop infinito*/
+/*gera_valores/7 faz o mesmo que gera_valores/6, porem existe uma memoria das casas com k=0 já vizitadas*/
 gera_valores(Row,Col,Size,_,_,_,[]):- % campo fora do limite do tabuleiro
 	( Row > Size ; Row < 1 ; Col > Size ; Col < 1) ,
 	!.
@@ -249,7 +257,7 @@ retira_elemento(_,[],[]).
 retira_elemento(X,[X|L],Lout):- retira_elemento(X,L,Lout),!.
 retira_elemento(X,[Y|L],[Y|Lout]):- retira_elemento(X,L,Lout),!.
 
-/*Cada Jogada*/
+/*Procedimento para cada Jogada*/
 posicao(Row,Col):- % Programa 2 
 
 	open('Mina.txt',read,Mina_file),
@@ -258,16 +266,15 @@ posicao(Row,Col):- % Programa 2
 	read_mines(List_minas,Mina_file),
 	close(Mina_file),
 
-	open('Board.txt',read,Board_file),
-	read_values(List_board,Board_file),
-	close(Board_file),
+	file_to_list('Board.txt',List_board),
 
 	gera_valores(Row,Col,Size,List_board,List_minas,Novo_Ambiente),
-	imrpimr_ambiente(Novo_Ambiente,List_board),
-
+	imprimir_ambiente(Novo_Ambiente,List_board),
 	!.
 
-imrpimr_ambiente(Novo_Ambiente,List_board):-
+
+/* Guarda no arquivo Ambiente, o novo embiente apos uma jogada, e imprime na tela apenas as novas casas aberas */
+imprimir_ambiente(Novo_Ambiente,List_board):-
 	file_to_list('Ambiente.txt',List_Ambiente),
 
 	uniao_lista_and_print(Novo_Ambiente,List_Ambiente,Ambiente_temp),
@@ -289,31 +296,24 @@ uniao_lista_and_print([X|L1],L2,[X|L3]):-
     uniao_lista_and_print(L1,L2,L3),
     !.
 
+/* Verifica se L1 está contido em L2*/
 contains_list([],_).
 contains_list([X|L1],L2):- member(X,L2), contains_list(L1,L2).
 
-is_game_over(List_board,List_ambiente,[game_over(win)|List_ambiente]):- 
-	contains_list(List_board,List_ambiente), 
+is_game_over(List_board,List_ambiente,[game_over(win)|List_ambiente]):-
+	contains_list(List_board,List_ambiente),
 	write('You_win_Game_Over'), nl,
 	!.
 is_game_over(_,L,L).
-
-file_to_list(Nome,List):-
-	open(Nome,read,File),
-  	read_list(List,File),
-  	close(File)
-	.
 
 /** Problema 3 - Jogar!  **/
 
 joga:- start_game(Size), joga(Size).
 
-joga(Size):- joga_aleatorio(Size,[],List_Ambiente), not(joga_(Size,List_Ambiente)).  
+joga(Size):- joga_aleatorio(Size,[],List_Ambiente), joga_(Size,List_Ambiente).
 
+joga_(_,List_Ambiente):- member(game_over(_),List_Ambiente),!.
 joga_(Size,List_Ambiente):-
-
-  	not(member(game_over(win),List_Ambiente)), % por conta dessas duas linhas jogo_/2 retorna sempre false
-  	not(member(game_over(loose),List_Ambiente)),
   	
   	criando_disjuncoes(List_Ambiente,Disjuncoes_temp,Size),
   	remove_lista_vazia(Disjuncoes_temp,Disjuncoes),
@@ -321,19 +321,25 @@ joga_(Size,List_Ambiente):-
   	simplifica(Disjuncoes, [Disj]), 
 
   	get_information(Disj,List_literais),
-  	% nl,write('List_literais = '),printgus([List_literais]),nl, % DEBUG
+  	
   	find_mina(List_literais),
   	find_play(List_literais,List_posicoes),
-  	% write('List_posicoes = '),printgus([List_posicoes]),nl, % DEBUG
   	play_all(List_posicoes,Size,List_Ambiente,Nova_List_Ambiente),
 
 	joga_(Size,Nova_List_Ambiente),
 	!.
 
+/* 
+	Dado a lista de anbiente. Para cada casa com valor(Row,Col,K) com K > 0
+	o programa cria esperaços booleanas de todas as possiveis combinaçoes de 
+	minas ao redor da casa (Row,Col).
+*/
+
+/* criando_disjuncoes/3 é auxiliar para chamr criando_disjuncoes/4*/
 criando_disjuncoes(List_Ambiente,Disjuncoes,Size):-
 	criando_disjuncoes(List_Ambiente,List_Ambiente,Disjuncoes,Size),
 	!.
-
+/* Cria uma conjunção de dijunções de cada elemento valor(Row,Col,K) */
 criando_disjuncoes(_,[],[],_):-!.
 criando_disjuncoes(List_Ambiente,[valor(_,_,0)|Board],Resto,Size):- criando_disjuncoes(List_Ambiente,Board,Resto,Size),!.
 criando_disjuncoes(List_Ambiente,[valor(Row,Col,K)|Board],[Disj|Resto],Size):-
@@ -362,11 +368,13 @@ criando_disjuncoes(List_Ambiente,[valor(Row,Col,K)|Board],[Disj|Resto],Size):-
 	criando_disjuncoes(List_Ambiente,Board,Resto,Size),
 	!.
 
+/* Retorna um literal no formato [Row,Col] caso seja uma casa fechada */
 gera_literal(Row,Col,[],List_Ambiente,Size):-
 	( Row > Size ; Row < 1 ; Col > Size ; Col < 1 ; member(valor(Row,Col,_),List_Ambiente)), 
 	!.
 gera_literal(Row,Col,[Literal],_,_):- Literal = [Row,Col],!.
 
+/* Cria uma disjunção, que são as conbinações de todas as situações possiveis dado um valor(Row,Col,K) */
 criando_disjucao([],_,[[]],_).
 criando_disjucao([Literal|List_literais],0,[[barra(Literal)|List_restante]],Size):-
 	criando_disjucao(List_literais,0,[List_restante],Size),
@@ -386,14 +394,17 @@ criando_disjucao([Literal|List_literais],K,Disj_final,Size):-
 	append(Disj_1,Disj_2,Disj_final),
 	!.
 
+/* Adiciona um litral em todas as clausulas de uma disjunção */
 add_literal(_,[],[]).
 add_literal(Literal,[Clau|Disj_1],[[Literal|Clau]|Disj_2]):-
 	add_literal(Literal,Disj_1,Disj_2),
 	!.
 
+/* Tamanho de uma lista */
 list_len([],0).
 list_len([_|L],N):-list_len(L,M), N is M+1.
 
+/* Dado uma lista de literais já filtradas pela get_information/2, procura todos os elementos [Row,Col] que representa mina*/
 find_mina([]).
 find_mina([barra(_)|List_literais]):- find_mina(List_literais),!.
 find_mina([[Row,Col]|List_literais]):- 
@@ -408,25 +419,26 @@ find_mina([[Row,Col]|List_literais]):-
 	!.
 find_mina([[_,_]|List_literais]):- find_mina(List_literais),!. 
 
-
+/* Dado uma lista de literais já filtradas pela get_information/2, procura elementos barra([Row,Col]) que representa não tem mina*/
 find_play([],[]).
 find_play([barra(Literal)|List_literais],[Literal|Resto]):- find_play(List_literais,Resto),!.
 find_play([_|List_literais],Resto):- find_play(List_literais,Resto),!.
 
+/* Joga todas as posições achadas pelo find_play */
 /*  LA = List_Ambiente  */
 play_all([],Size,LA,Nova_LA):- 
-	joga_aleatorio(Size,LA,Nova_LA),!.
+	joga_aleatorio(Size,LA,Nova_LA),
+	!.
 play_all([[Row,Col]],_,LA,Nova_LA):- 
-	joga_na_posicao(Row,Col,LA,Nova_LA),!.
+	joga_na_posicao(Row,Col,LA,Nova_LA),
+	!.
 play_all([[Row,Col]|List],_,LA,Nova_LA):- 
 	joga_na_posicao(Row,Col,LA,Nova_LA_temp), 
 	play_all(List,_,Nova_LA_temp,Nova_LA),!.
 
-% joga_aleatorio(_):- joga_na_posicao(3,3).
+/* Joga aleatoriamente, evitando lugares onde já foram jogados e lugares que se sabe que é mina */
 joga_aleatorio(S,LA,Nova_LA):- Size is S + 1, random(1,Size,Row), random(1,Size,Col), joga_na_posicao(Row,Col,LA,Nova_LA).
-
 joga_na_posicao(_,_,List_Ambiente,List_Ambiente):- member(game_over(_),List_Ambiente),!.
-
 joga_na_posicao(Row,Col,List_Ambiente,Nova_List_Ambiente):-
 	file_to_list('Jogadas.txt',List_jogadas_e_minas),
 	
@@ -444,13 +456,14 @@ joga_na_posicao(Row,Col,List_Ambiente,Nova_List_Ambiente):-
 	!.
 joga_na_posicao(_,_,List_Ambiente,List_Ambiente).
 
-
+/* Auxicliar */
 remove_lista_vazia([],[]).
 remove_lista_vazia([ [[]] |L],Lout):- remove_lista_vazia(L,Lout).
 remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 
 /* INICIO DO CODIGO QUE RESOLVE AS DIJUSNÇOES */
 
+	/* Dado uma disjunção, retorna uma lista com todos os literias que estão em todas as clausulas*/
 	get_information([Clau],Clau):-!.
 	get_information([Clausula|Clausulas],List_literais):-
 		get_information(Clausulas,Clausula,List_literais),

@@ -3,7 +3,7 @@ Programa 1 - prolog
 
  Este programa deve receber como entrada um arquivo chamado mina.pl com as posições das minas em um tabuleiro e gerar a configuração do tabuleiro de jogo onde cada posição deve ter um valor associado representando o número de minas existentes nas casas adjacentes. Por exemplo, se o arquivo de entrada contiver as seguintes cláusulas: */
 /*tamanho do tabuleiro - sempre quadrado - no exemplo ele será 5x5*/
-tabuleiro (5).
+tabuleiro(5).
 
 /*mina(linha,coluna): exista mina na posição (linha,coluna)*/
 mina(2,1).
