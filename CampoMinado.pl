@@ -463,7 +463,7 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 
 /* INICIO DO CODIGO QUE RESOLVE AS DIJUSNÇOES */
 
-	/* Dado uma disjunção, retorna uma lista com todos os literias que estão em todas as clausulas*/
+	/* Dado uma disjunção, retorna uma lista com todos os literias que estão em todas as clausulas */
 	get_information([Clau],Clau):-!.
 	get_information([Clausula|Clausulas],List_literais):-
 		get_information(Clausulas,Clausula,List_literais),
@@ -478,6 +478,7 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 		get_information(Disj,Literais,Resto),
 		!.
 
+	/* Checa se um elemento está em todas as listas */
 	is_there_all_list(Literal,[Clau]):-
 		member(Literal,Clau),
 		!.
@@ -486,12 +487,14 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 		is_there_all_list(Literal,Clausulas),
 		!.
 
+	/* Simplifica uma lista de disjuncoes em apenas uma disjuncao*/
 	simplifica([Disj],[Disj]).
 	simplifica([Disjuncao1, Disjuncao2 |List_disj],Resultado):- 
 		fusao_disjuncoes(Disjuncao1,Disjuncao2,Disj_temp),
 		simplifica([Disj_temp|List_disj],Resultado),
 		!.
 
+	/* Junta duas disjunções */
 	fusao_disjuncoes([],_,[]).
 	fusao_disjuncoes([Clau|Clausulas], Disj, Elemento ):- 
 		distributiva(Clau,Disj,[]),
@@ -503,6 +506,7 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 		append(Disj_temp, Disj_resultante, Elemento),
 		!.
 
+	/* Aplica distributiva de uma clausula em uma disjunção */
 	distributiva(_,[],[]).
 	distributiva(Clausula,[Clau|Clausulas],Retorno):- 
 		multiplica_expresao_boleana(Clausula,Clau,[]), 
@@ -513,18 +517,22 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 		distributiva(Clausula,Clausulas,Retorno),
 		!.
 
-	% multiplica_expresao_boleana().
+	/* Junta duas clausulas se possivel */
+	/* multiplica_expresao_boleana_ é quando a clausula resultante é [] */
+	/* multiplica_expresao_boleana é quando a clausula resultante é diferente de [] */
+	/* A diferença de das funções foi por uma questão de otimização! */
 	multiplica_expresao_boleana_([barra(Literal)|_],Clausula):- member(Literal,Clausula),!.
 	multiplica_expresao_boleana_([Literal|_],Clausula):- member(barra(Literal),Clausula),!.
 	multiplica_expresao_boleana_([_|Literais],Clausula):- multiplica_expresao_boleana_(Literais,Clausula),!.
 
 	multiplica_expresao_boleana(Clausula1,Clausula2,[]):-
-		multiplica_expresao_boleana_(Clausula1,Clausula2),!
-		.
+		multiplica_expresao_boleana_(Clausula1,Clausula2),
+		!.
 	multiplica_expresao_boleana(Clausula1,Clausula2,Clau_resultante):-
-		uniao_lista(Clausula1,Clausula2,Clau_resultante),!. 
+		uniao_lista(Clausula1,Clausula2,Clau_resultante),
+		!. 
 
-
+	/* Junta duas Listas em uma sem repetição */
 	uniao_lista([],L,L).
 	uniao_lista([X|L1],L2,L3):-
 		member(X,L2),
@@ -534,9 +542,5 @@ remove_lista_vazia([X|L],[X|Lout]):- remove_lista_vazia(L,Lout).
 	    not(member(X,L2)),
 	    uniao_lista(L1,L2,L3),
 	    !.
+
 /* FIM DO CODIGO QUE RESOLVE AS DIJUSNÇOES*/
-
-
-% auxilio para debugar!!!
-printgus([]).
-printgus([X|L]):- write(X),nl,printgus(L).
